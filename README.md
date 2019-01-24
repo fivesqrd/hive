@@ -1,18 +1,42 @@
 # Hive PHP Client
 
-## Configuratio
+## Configuration
 ```
 $config = [
-    'table' => 'My-Table-Name'
-    'aws' =>
+    'table' => 'My-Table-Name',
+    'aws' => [
         'version' => 'latest',
         'region'  => 'eu-west-1',
         'credentials' => [
-            'key'    => 'test',
-            'secret' => 'test',
+            'key'    => 'my-key',
+            'secret' => 'my-secret',
         ],
     ],
 ];
+```
+
+## Preparing a DynamoDb table
+Create a local config file say config.php
+
+```
+<?php
+
+return [
+    'table' => 'My-Table-Name',
+    'aws' => [
+        'version' => 'latest',
+        'region'  => 'eu-west-1',
+        'credentials' => [
+            'key'    => 'my-key',
+            'secret' => 'my-secret',
+        ],
+    ],
+];
+```
+
+Run the table create script
+```
+php vendor/fivesqrd/hive/scripts/CreateTable.php config.php
 ```
 
 ## Instantiate the queue

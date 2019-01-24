@@ -2,7 +2,7 @@
 
 namespace Hive;
 
-class Model extends Bego\Model
+class Model extends \Bego\Model
 {
     /**
      * Table name

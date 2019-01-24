@@ -30,9 +30,8 @@ class Queue
     public function add($payload, $timeslot = 0)
     {
         return $this->_table->put([
-            'Id'        => uniqid(), 
+            'Id'        => bin2hex(random_bytes(16)), 
             'Queue'     => $this->_name,
-            'Locked'    => 0,
             'Timestamp' => gmdate('c'),
             'Timeslot'  => $timeslot ?: gmdate('c'), //or 0 to run as soon as possible
             'Payload'   => $payload,
