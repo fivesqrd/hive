@@ -1,0 +1,19 @@
+{
+	"name": "fivesqrd/hive",
+	"description": "Simple Job Queue Client",
+	"require": {
+        "fivesqrd/bego": "~0.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hive\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Christian Burger",
+            "email": "christian@fivesqrd.com",
+            "role": "Developer"
+        }
+    ]
+}
