@@ -1,4 +1,5 @@
 # Hive PHP Client
+Hive is a simple job queue library for PHP that uses DynamoDB for a backend.
 
 ## Configuration
 ```
@@ -64,9 +65,26 @@ $job = $queue->add(
 );
 ```
 
-## Get all pending jobs
+## Get all pending jobs from a queue
 ```
+/* Receive 5 jobs and lock them for 300 seconds (FIFO) */
 $jobs = $queue->receive(5, 300);
+
+foreach ($jobs as $job) {
+
+    $payload = $job->attribute('Payload');
+
+    /* Do the work */
+    $jobId = $job->attribute('Id');
+
+    /* Mark job as done */
+    $queue->done($job);
+}
+```
+
+```
+/* Receive 5 jobs and lock them for 300 seconds (FILO) */
+$jobs = $queue->receive(5, 300, false);
 
 foreach ($jobs as $job) {
 

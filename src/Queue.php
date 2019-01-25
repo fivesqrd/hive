@@ -8,6 +8,8 @@ class Queue
 
     protected $_table;
 
+    const INDEX_NAME = 'Queue-Timeslot-Index';
+
     public static function instance($config, $name)
     {
         $db = new \Bego\Database(
@@ -33,26 +35,28 @@ class Queue
             'Id'        => bin2hex(random_bytes(16)), 
             'Queue'     => $this->_name,
             'Timestamp' => gmdate('c'),
-            'Timeslot'  => $timeslot ?: gmdate('c'), //or 0 to run as soon as possible
+            'Timeslot'  => (string) $timeslot ?: '0', //or 0 to run as soon as possible
             'Payload'   => $payload,
             'Status'    => 'queued'
         ]);
     }
 
-    public function receive($limit, $ttl = 300)
+    public function receive($limit, $ttl = 300, $fifo = true)
     {
-        $results = $this->_table->query('Queue-Locked-Index')
+        $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
             ->condition('Timeslot', '<=', gmdate('c'))
-            ->consistent()
+            //->consistent()
+            ->reverse($fifo)
             ->limit($limit)
             ->fetch(); 
 
+
         foreach ($results as $item) {
-            $item->set('Timeslot', date('c', utctime() + $ttl));
+            $item->set('Timeslot', date('c', gmdate('U') + $ttl));
             $item->set('Worker', gethostname());
             $item->set('Started', gmdate('c'));
-            $table->update($item);
+            $this->_table->update($item);
         }
 
         return $results;
