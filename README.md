@@ -53,15 +53,13 @@ $payload = ['to' => 'you@domain.com', 'subject' => 'hello'];
 
 /* Run as soon as possible */
 $job = $queue->add($payload);
-
-Hive\Queue::instance('Welcome-Email-Notifications')->add($payload);
 ```
 
 ```
 
 /* Schedule for later */
 $job = $queue->add(
-    $payload, date('c', utctime() + 3600)
+    $payload, date('c', time() + 3600)
 );
 ```
 
