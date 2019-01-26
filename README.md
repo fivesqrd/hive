@@ -59,7 +59,7 @@ $job = $queue->add($payload);
 
 /* Schedule for later */
 $job = $queue->add(
-    $payload, date('c', time() + 3600)
+    $payload, time() + 3600
 );
 ```
 

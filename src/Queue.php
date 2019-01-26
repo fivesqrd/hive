@@ -31,17 +31,21 @@ class Queue
 
     public function add($payload, $timeslot = 0)
     {
+        /* Keep for 30 days */
+        $ttl = 86400 * 30;
+
         return $this->_table->put([
             'Id'        => bin2hex(random_bytes(16)), 
             'Queue'     => $this->_name,
             'Timestamp' => gmdate('c'),
-            'Timeslot'  => (string) $timeslot ?: '0', //or 0 to run as soon as possible
+            'Timeslot'  => $timeslot ? gmdate('c', $timestlot) : '0', //or 0 to run as soon as possible
+            'Destroy'   => $timeslot ? $timeslot + $ttl : time() + $ttl,
             'Payload'   => $payload,
             'Status'    => 'queued'
         ]);
     }
 
-    public function receive($limit, $ttl = 300, $fifo = true)
+    public function receive($limit, $timeout = 300, $fifo = true)
     {
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
@@ -53,7 +57,7 @@ class Queue
 
 
         foreach ($results as $item) {
-            $item->set('Timeslot', date('c', gmdate('U') + $ttl));
+            $item->set('Timeslot', gmdate('c', time() + $timeout));
             $item->set('Worker', gethostname());
             $item->set('Started', gmdate('c'));
             $this->_table->update($item);
