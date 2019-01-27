@@ -49,18 +49,34 @@ $queue = Hive\Queue::instance(
 
 ## Add a job to the queue
 ```
-$payload = ['to' => 'you@domain.com', 'subject' => 'hello'];
+
+$job = new Hive\Job(
+    ['to' => 'you@domain.com', 'subject' => 'hello']
+);
 
 /* Run as soon as possible */
-$job = $queue->add($payload);
+$result = $queue->add($job);
+```
+
+```
+
+$jobs = [
+    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello']),
+    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello 2']),
+];
+
+/* Add multiple jobs as part of a batch */
+$batchId = $queue->batch($job);
 ```
 
 ```
 
 /* Schedule for later */
-$job = $queue->add(
-    $payload, time() + 3600
+$job = new Hive\Job(
+    ['to' => 'you@domain.com', 'subject' => 'hello'], gmdate('U') + 300
 );
+
+$result = $queue->add($job);
 ```
 
 ## Get all pending jobs from a queue

@@ -9,6 +9,7 @@ class Queue
     protected $_table;
 
     const INDEX_NAME = 'Queue-Timeslot-Index';
+    const ATTEMPT_LIMIT = 3;
 
     public static function instance($config, $name)
     {
@@ -29,20 +30,34 @@ class Queue
         $this->_name = $name;
     }
 
-    public function add($payload, $timeslot = 0)
+    public function add(Job $job)
     {
-        /* Keep for 30 days */
-        $ttl = 86400 * 30;
+        $item = $job->item();
 
-        return $this->_table->put([
-            'Id'        => bin2hex(random_bytes(16)), 
-            'Queue'     => $this->_name,
-            'Timestamp' => gmdate('c'),
-            'Timeslot'  => $timeslot ? gmdate('c', $timestlot) : '0', //or 0 to run as soon as possible
-            'Destroy'   => $timeslot ? $timeslot + $ttl : time() + $ttl,
-            'Payload'   => $payload,
-            'Status'    => 'queued'
-        ]);
+        $item['Queue'] = $this->_name;
+
+        $this->_table->put($item);
+
+        return $item;
+    }
+
+    /**
+     * Add jobs to queue with the same key
+     */
+    public function batch(array $jobs)
+    {
+        $batchId = uniqid();
+
+        foreach ($jobs as $job) {
+            $item = $job->item();
+
+            $item['Queue'] = $this->_name;
+            $item['Batch'] = $batchId;
+
+            $this->_table->put($item);
+        }
+
+        return $batchId;
     }
 
     public function receive($limit, $timeout = 300, $fifo = true)
@@ -57,9 +72,19 @@ class Queue
 
 
         foreach ($results as $item) {
+            $attempts = $item->attribute('Attempts');
+
             $item->set('Timeslot', gmdate('c', time() + $timeout));
             $item->set('Worker', gethostname());
             $item->set('Started', gmdate('c'));
+            $item->set('Attempts', $attempts + 1);
+
+            if ($attempts >= static::ATTEMPT_LIMIT) {
+                /* Last attempt for this job */
+                $job->remove('Timeslot');
+                $job->set('Status', 'failed');
+            } 
+
             $this->_table->update($item);
         }
 
@@ -69,8 +94,10 @@ class Queue
     public function done($job)
     {
         $job->set('Status', 'completed');
-        $job->set('Worker', gethostname());
         $job->set('Completed', gmdate('c'));
+        if (!$job->attribute('Worker')) {
+            $job->set('Worker', gethostname());
+        }
         $job->remove('Timeslot');
 
         $this->_table->update($job);
