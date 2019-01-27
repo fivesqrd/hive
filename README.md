@@ -60,23 +60,23 @@ $result = $queue->add($job);
 
 ```
 
-$jobs = [
-    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello']),
-    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello 2']),
-];
-
-/* Add multiple jobs as part of a batch */
-$batchId = $queue->batch($job);
-```
-
-```
-
 /* Schedule for later */
 $job = new Hive\Job(
     ['to' => 'you@domain.com', 'subject' => 'hello'], gmdate('U') + 300
 );
 
 $result = $queue->add($job);
+```
+
+```
+/* Add multiple jobs as part of a batch */
+
+$jobs = [
+    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello']),
+    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello 2']),
+];
+
+$batchId = $queue->batch($job);
 ```
 
 ## Get all pending jobs from a queue

@@ -54,6 +54,7 @@ class Queue
             $item['Queue'] = $this->_name;
             $item['Batch'] = $batchId;
 
+            /* Todo: use batch write instead */
             $this->_table->put($item);
         }
 
@@ -81,8 +82,8 @@ class Queue
 
             if ($attempts >= static::ATTEMPT_LIMIT) {
                 /* Last attempt for this job */
-                $job->remove('Timeslot');
-                $job->set('Status', 'failed');
+                $item->remove('Timeslot');
+                $item->set('Status', 'failed');
             } 
 
             $this->_table->update($item);
