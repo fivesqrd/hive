@@ -75,16 +75,17 @@ class Queue
         foreach ($results as $item) {
             $attempts = $item->attribute('Attempts');
 
-            $item->set('Timeslot', gmdate('c', time() + $timeout));
-            $item->set('Worker', gethostname());
-            $item->set('Started', gmdate('c'));
-            $item->set('Attempts', $attempts + 1);
-
             if ($attempts >= static::ATTEMPT_LIMIT) {
                 /* Last attempt for this job */
                 $item->remove('Timeslot');
                 $item->set('Status', 'failed');
-            } 
+                $item->set('Attempts', $attempts + 1);
+            } else {
+                $item->set('Timeslot', gmdate('c', time() + $timeout));
+                $item->set('Worker', gethostname());
+                $item->set('Started', gmdate('c'));
+                $item->set('Attempts', $attempts + 1);
+            }
 
             $this->_table->update($item);
         }
