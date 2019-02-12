@@ -35,7 +35,7 @@ class Queue
     public function add(Job $job)
     {
         $this->_table->put(
-            $job->queue($this->_name)->item()
+            $job->queue($this->_name)->item()->attributes()
         );
 
         return $item;
@@ -53,7 +53,7 @@ class Queue
             /* Todo: use batch write instead */
 
             $this->_table->put(
-                $job->batch($batchId)->queue($this->_name)->item()
+                $job->batch($batchId)->queue($this->_name)->item()->attributes()
             );
         }
 

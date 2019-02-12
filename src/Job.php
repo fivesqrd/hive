@@ -2,6 +2,8 @@
 
 namespace Hive;
 
+use Bego;
+
 class Job
 {
     protected $_item;
@@ -18,7 +20,7 @@ class Job
         return new static(new Bego\Item([
             'Id'        => bin2hex(random_bytes(16)), 
             'Timestamp' => gmdate('c'),
-            'Timeslot'  => $timeslot ? gmdate('c', $timeslot) : 0, //or 0 to run as soon as possible
+            'Timeslot'  => $timeslot ? gmdate('c', $timeslot) : '0', //or 0 to run as soon as possible
             'Destroy'   => $destroy + static::TTL,
             'Payload'   => $payload,
             'Attempts'  => 0,
@@ -92,7 +94,7 @@ class Job
      */
     public function prepare($timeout)
     {
-        $attempts = $item->attribute('Attempts');
+        $attempts = $this->_item->attribute('Attempts');
 
         if ($attempts >= $this->_attemptLimit) {
             /* Last attempt for this job */
