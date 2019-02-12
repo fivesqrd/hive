@@ -2,6 +2,9 @@
 
 namespace Hive;
 
+use Bego;
+use Aws\DynamoDb;
+
 class Queue
 {
     protected $_name;
@@ -9,12 +12,11 @@ class Queue
     protected $_table;
 
     const INDEX_NAME = 'Queue-Timeslot-Index';
-    const ATTEMPT_LIMIT = 3;
 
     public static function instance($config, $name)
     {
-        $db = new \Bego\Database(
-            new \Aws\DynamoDb\DynamoDbClient($config['aws']), new \Aws\DynamoDb\Marshaler()
+        $db = new Bego\Database(
+            new DynamoDb\DynamoDbClient($config['aws']), new \Aws\DynamoDb\Marshaler()
         );
 
         $table = $db->table(
@@ -32,11 +34,9 @@ class Queue
 
     public function add(Job $job)
     {
-        $item = $job->item();
-
-        $item['Queue'] = $this->_name;
-
-        $this->_table->put($item);
+        $this->_table->put(
+            $job->queue($this->_name)->item()
+        );
 
         return $item;
     }
@@ -49,13 +49,12 @@ class Queue
         $batchId = uniqid();
 
         foreach ($jobs as $job) {
-            $item = $job->item();
-
-            $item['Queue'] = $this->_name;
-            $item['Batch'] = $batchId;
 
             /* Todo: use batch write instead */
-            $this->_table->put($item);
+
+            $this->_table->put(
+                $job->batch($batchId)->queue($this->_name)->item()
+            );
         }
 
         return $batchId;
@@ -66,42 +65,44 @@ class Queue
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
             ->condition('Timeslot', '<=', gmdate('c'))
-            //->consistent()
             ->reverse($fifo)
             ->limit($limit)
             ->fetch(); 
 
+        $received = [];
 
         foreach ($results as $item) {
+
             $attempts = $item->attribute('Attempts');
 
-            if ($attempts >= static::ATTEMPT_LIMIT) {
-                /* Last attempt for this job */
-                $item->remove('Timeslot');
-                $item->set('Status', 'failed');
-                $item->set('Attempts', $attempts + 1);
-            } else {
-                $item->set('Timeslot', gmdate('c', time() + $timeout));
-                $item->set('Worker', gethostname());
-                $item->set('Started', gmdate('c'));
-                $item->set('Attempts', $attempts + 1);
-            }
+            $job = new Job($item);
 
-            $this->_table->update($item);
+            $attempts = $job->prepare($timeout);
+
+            /* 
+             * Using attempts as a version number for optimistic locking.
+             * If the number of attempts is not consistent without our value,
+             * another worker has beaten us to taking this job
+             */
+
+            $conditions = [
+                 Bego\Condition::comperator('Attempts', '=', $attempts),
+            ];
+
+            /* 
+             * Only if the update succeeded will we return the item 
+             */
+
+            if ($this->_table->update($job->item(), $conditions)) {
+                $received[] = $job;
+            }
         }
 
-        return $results;
+        return $received;
     }
 
     public function done($job)
     {
-        $job->set('Status', 'completed');
-        $job->set('Completed', gmdate('c'));
-        if (!$job->attribute('Worker')) {
-            $job->set('Worker', gethostname());
-        }
-        $job->remove('Timeslot');
-
-        $this->_table->update($job);
+        $this->_table->update($job->completed()->item());
     }
 }

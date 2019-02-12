@@ -50,7 +50,7 @@ $queue = Hive\Queue::instance(
 ## Add a job to the queue
 ```
 
-$job = new Hive\Job(
+$job = Hive\Job::create(
     ['to' => 'you@domain.com', 'subject' => 'hello']
 );
 
@@ -61,8 +61,9 @@ $result = $queue->add($job);
 ```
 
 /* Schedule for later */
-$job = new Hive\Job(
-    ['to' => 'you@domain.com', 'subject' => 'hello'], gmdate('U') + 300
+$job = Hive\Job::create(
+    ['to' => 'you@domain.com', 'subject' => 'hello'], 
+    gmdate('U') + 300
 );
 
 $result = $queue->add($job);
@@ -72,8 +73,8 @@ $result = $queue->add($job);
 /* Add multiple jobs as part of a batch */
 
 $jobs = [
-    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello']),
-    new Hive\Job(['to' => 'you@domain.com', 'subject' => 'hello 2']),
+    Hive\Job::create(['to' => 'you@domain.com', 'subject' => 'hello']),
+    Hive\Job::create(['to' => 'you@domain.com', 'subject' => 'hello 2']),
 ];
 
 $batchId = $queue->batch($job);
@@ -86,10 +87,10 @@ $jobs = $queue->receive(5, 300);
 
 foreach ($jobs as $job) {
 
-    $payload = $job->attribute('Payload');
+    $payload = $job->payload();
 
     /* Do the work */
-    $jobId = $job->attribute('Id');
+    $jobId = $job->id();
 
     /* Mark job as done */
     $queue->done($job);
@@ -102,10 +103,10 @@ $jobs = $queue->receive(5, 300, false);
 
 foreach ($jobs as $job) {
 
-    $payload = $job->attribute('Payload');
+    $subject = $job->payload('subject');
 
     /* Do the work */
-    $jobId = $job->attribute('Id');
+    $jobId = $job->id();
 
     /* Mark job as done */
     $queue->done($job);
