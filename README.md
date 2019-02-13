@@ -6,7 +6,7 @@ Hive is a simple job queue library for PHP that uses DynamoDB for a backend.
 $config = [
     'table' => 'My-Table-Name',
     'aws' => [
-        'version' => 'latest',
+        'version' => '2012-08-10',
         'region'  => 'eu-west-1',
         'credentials' => [
             'key'    => 'my-key',

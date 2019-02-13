@@ -15,6 +15,10 @@ class Queue
 
     public static function instance($config, $name)
     {
+        if (!isset($config['aws']['version'])) {
+            $config['aws']['version'] = '2012-08-10';
+        }
+        
         $db = new Bego\Database(
             new DynamoDb\DynamoDbClient($config['aws']), new \Aws\DynamoDb\Marshaler()
         );
