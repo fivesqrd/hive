@@ -68,7 +68,7 @@ class Queue
     {
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
-            ->condition('Timeslot', '<=', gmdate('c'))
+            ->condition(Bego\Condition::comperator('Timeslot', '<=', gmdate('c')))
             ->reverse($fifo)
             ->limit($limit)
             ->fetch(); 
