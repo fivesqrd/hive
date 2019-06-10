@@ -38,11 +38,11 @@ class Queue
 
     public function add(Job $job)
     {
-        $this->_table->put(
+        $item = $this->_table->put(
             $job->queue($this->_name)->item()->attributes()
         );
 
-        return $item;
+        return $job->id();
     }
 
     /**
