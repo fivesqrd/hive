@@ -42,9 +42,10 @@ php vendor/fivesqrd/hive/scripts/CreateTable.php config.php
 
 ## Instantiate the queue
 ```
-$queue = Hive\Queue::instance(
+$queue = Hive\Factory::queue(
     $config, 'Welcome-Email-Notifications'
 );
+
 ```
 
 ## Add a job to the queue
@@ -116,7 +117,7 @@ foreach ($jobs as $job) {
 ## Queurying the contents of the queue
 View the contents of current and past queue items without affecting the queue
 ```
-$query = Hive\Query::create(
+$factory = Hive\Factory::query(
     $config, 'Welcome-Email-Notifications'
 );
 

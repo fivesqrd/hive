@@ -3,7 +3,6 @@
 namespace Hive;
 
 use Bego;
-use Aws\DynamoDb;
 
 class Queue
 {
@@ -12,23 +11,6 @@ class Queue
     protected $_table;
 
     const INDEX_NAME = 'Queue-Timeslot-Index';
-
-    public static function instance($config, $name)
-    {
-        if (!isset($config['aws']['version'])) {
-            $config['aws']['version'] = '2012-08-10';
-        }
-        
-        $db = new Bego\Database(
-            new DynamoDb\DynamoDbClient($config['aws']), new \Aws\DynamoDb\Marshaler()
-        );
-
-        $table = $db->table(
-            new Model($config['table'])
-        );
-
-        return new static($table, $name);
-    }
 
     public function __construct($table, $name)
     {

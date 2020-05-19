@@ -2,9 +2,6 @@
 
 namespace Hive;
 
-use Bego;
-use Aws\DynamoDb;
-
 class Query
 {
     protected $_name;
@@ -12,23 +9,6 @@ class Query
     protected $_table;
 
     const INDEX_TIMESTAMP = 'Queue-Timestamp-Index';
-
-    public static function create($config, $name)
-    {
-        if (!isset($config['aws']['version'])) {
-            $config['aws']['version'] = '2012-08-10';
-        }
-        
-        $db = new Bego\Database(
-            new DynamoDb\DynamoDbClient($config['aws']), new \Aws\DynamoDb\Marshaler()
-        );
-
-        $table = $db->table(
-            new Model($config['table'])
-        );
-
-        return new static($table, $name);
-    }
 
     public function __construct($table, $name)
     {
