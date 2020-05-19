@@ -27,6 +27,31 @@ class Queue
         return $job->id();
     }
 
+    public function cancel($id)
+    {
+        $item = $this->_table->fetch($id);
+
+        if (!$item->attribute('Id')) {
+            throw new Exception(
+                "Requested job is not in queue anymore"
+            );
+        }
+
+        if ($item->attribute('Queue') != $this->_name) {
+            throw new Exception(
+                "Requested action is not authorised"
+            );
+        }
+
+        if ($item->attribute('Status') != 'queued') {
+            throw new Exception(
+                "Job {$id} is {$item->attribute('Status')} and cannot be cancelled"
+            );
+        }
+
+        return $this->_table->delete($item);
+    }
+
     /**
      * Add jobs to queue with the same key
      */

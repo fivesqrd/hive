@@ -152,3 +152,8 @@ foreach ($items as $job) {
     print_r($job->attributes());
 }
 ```
+
+## Cancelling a queued job
+```
+$result = $queue->cancel($job->attribute('Id'));
+```
