@@ -18,7 +18,7 @@ class Query
 
     public function queued($limit = 30, $fifo = true)
     {
-        return $this->_table->query(QUEUE::INDEX_NAME)
+        return $this->_table->query(Queue::INDEX_NAME)
             ->key($this->_name)
             ->reverse($fifo)
             ->limit($limit)
