@@ -31,6 +31,9 @@ class Model extends \Bego\Model
             'Queue-Timeslot-Index' => [
                 'key' => 'Queue', 'sort' => 'Timeslot'
             ],
+            'Queue-Timestamp-Index' => [
+                'key' => 'Queue', 'sort' => 'Timestamp'
+            ],
         ];
     }
 }

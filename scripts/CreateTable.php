@@ -30,7 +30,15 @@ $spec = [
                 ['name' => 'Batch', 'types' => ['key' => 'RANGE', 'attribute' => 'S']],
             ],
             'capacity' => ['read' => 5, 'write' => 5]
-        ]
+        ],
+        'Queue-Timestamp-Index' => [
+            'type' => 'global',
+            'keys' => [
+                ['name' => 'Queue', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
+                ['name' => 'Timestamp', 'types' => ['key' => 'RANGE', 'attribute' => 'S']],
+            ],
+            'capacity' => ['read' => 5, 'write' => 5]
+        ],
     ]
 ];
 

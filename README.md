@@ -112,3 +112,42 @@ foreach ($jobs as $job) {
     $queue->done($job);
 }
 ```
+
+## Queurying the contents of the queue
+View the contents of current and past queue items without affecting the queue
+```
+$query = Hive\Query::create(
+    $config, 'Welcome-Email-Notifications'
+);
+
+/* Show the next 10 items waiting in the queue (FIFO) */
+$items = $query->queued(10, true);
+
+/* Show the next 10 items waiting in the queue (FILO) */
+$items = $query->queued(10, true);
+
+/* Show the 10 most recently added items (queued or not) */
+$items = $query->recent(10);
+
+/* Iterate over all the most recently added items (queued or not) */
+$items = $query->recentByPage(1);
+$items = $query->recentByPage(2);
+$items = $query->recentByPage(3);
+```
+
+```
+/* Access individual job attributes */
+foreach ($items as $job) {
+    echo "Job id: {$job->attribute('Id')}\n";
+    echo "Status: {$job->attribute('Status')}\n";
+    echo "Created on: {$job->attribute('Timestamp')}\n";
+    echo "Scheduled for: {$job->attribute('Timeslot')}\n";
+}
+```
+
+```
+/* Dump all attrinutes */
+foreach ($items as $job) {
+    print_r($job->attributes());
+}
+```
