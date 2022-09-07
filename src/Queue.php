@@ -86,7 +86,7 @@ class Queue
     {
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
-            ->condition(Bego\Condition::comperator('Timeslot', '<=', gmdate('c')))
+            ->condition(Bego\Condition::comperator('Status', '<>', 'completed'))
             ->reverse($fifo)
             ->limit($limit)
             ->fetch(); 
