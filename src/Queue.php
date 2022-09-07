@@ -12,7 +12,7 @@ class Queue
 
     const INDEX_NAME = 'Queue-Timeslot-Index';
 
-    public function __construct($table, $name)
+    public function __construct(Bego\Table $table, $name)
     {
         $this->_table = $table;
         $this->_name = $name;
@@ -32,15 +32,11 @@ class Queue
         $item = $this->_table->fetch($id);
 
         if (!$item->attribute('Id')) {
-            throw new Exception(
-                "Requested job is not in queue anymore"
-            );
+            throw new Exception('Requested job is not in queue anymore');
         }
 
         if ($item->attribute('Queue') != $this->_name) {
-            throw new Exception(
-                "Requested action is not authorised"
-            );
+            throw new Exception('Requested action is not authorised');
         }
 
         if ($item->attribute('Status') != 'queued') {
@@ -55,18 +51,16 @@ class Queue
     /**
      * Add jobs to queue with the same key
      */
-    public function batch(array $jobs)
+    public function batch(array $jobs, $workers = 2)
     {
         $batchId = uniqid();
 
-        foreach ($jobs as $job) {
+        // Extract the attributes array for each item
+        $items = array_map(
+            fn($job) => $job->batch($batchId)->queue($this->_name)->item()->attributes(), $jobs
+        );
 
-            /* Todo: use batch write instead */
-
-            $this->_table->put(
-                $job->batch($batchId)->queue($this->_name)->item()->attributes()
-            );
-        }
+        $this->_table->putBatch($items, $workers);
 
         return $batchId;
     }

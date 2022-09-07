@@ -2,7 +2,7 @@
 	"name": "fivesqrd/hive",
 	"description": "Simple Job Queue Client",
 	"require": {
-        "fivesqrd/bego": "~0.20.0"
+        "fivesqrd/bego": "^0.22.0"
     },
     "autoload": {
         "psr-4": {
