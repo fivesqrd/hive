@@ -51,15 +51,18 @@ class Queue
     /**
      * Remove pending items from the queue
      */
-    public function clear($limit)
+    public function clear($limit, $fifo = true)
     {
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_name)
             ->condition(Bego\Condition::comperator('Timeslot', '<=', gmdate('c')))
+            ->reverse($fifo)
             ->limit($limit)
             ->fetch(); 
 
-        return $this->_table->deleteResultset($results);
+        $this->_table->deleteResultset($results);
+
+        return $results->count();
     }
 
     /**
