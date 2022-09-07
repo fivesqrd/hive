@@ -49,6 +49,20 @@ class Queue
     }
 
     /**
+     * Remove pending items from the queue
+     */
+    public function clear($limit)
+    {
+        $results = $this->_table->query(static::INDEX_NAME)
+            ->key($this->_name)
+            ->condition(Bego\Condition::comperator('Timeslot', '<=', gmdate('c')))
+            ->limit($limit)
+            ->fetch(); 
+
+        return $this->_table->deleteResultset($results);
+    }
+
+    /**
      * Add jobs to queue with the same key
      */
     public function batch(array $jobs, $workers = 2)
